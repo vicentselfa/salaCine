@@ -39,26 +39,36 @@
                }
            }
       }
-      else {
-         if (isset($_POST['Registrar'])) {
-           // echo "Registrar";
-           if ($_POST['user'] !='') {
-               $dbo = new connexioPDO(); // Connexió a mySQL per defecte
-               $dbo->connectar();
-               if ($dbo->registrar($_POST['user'], $_POST['password']) ) {
-                  $_SESSION['Usuari'] = $_POST['user'];
-                  $_SESSION['Validat'] = true;
-                  $_SESSION['Missatge'] = "";
-                  header('Location: reserves.php');
-               }
-               else {
-                  // echo "NO registrat!";
-                  $_SESSION['Missatge'] = "Problemes amb el registre!";
-               }
-           }
-         }
-      } 
-      if ($_POST['user'] =='') { 
+      if (isset($_POST['Registrar'])) {
+        // echo "Registrar";
+        if ($_POST['user'] !='') {
+            $dbo = new connexioPDO(); // Connexió a mySQL per defecte
+            $dbo->connectar();
+            if ($dbo->registrar($_POST['user'], $_POST['password']) ) {
+               $_SESSION['Usuari'] = $_POST['user'];
+               $_SESSION['Validat'] = true;
+               $_SESSION['Missatge'] = "";
+               header('Location: reserves.php');
+            }
+            else {
+               // echo "NO registrat!";
+               $_SESSION['Missatge'] = "Problemes amb el registre!";
+            }
+        }
+      }
+      if ($_SESSION ['altraPeli']) {
+           $dbo = new connexioPDO(); // Connexió a mySQL per defecte
+           $dbo->connectar();
+            echo "Tria una  pel·lícula: <hr>";
+            $dbo->consultar ("select titol from pelicules;")  ;
+            // El formulari per triar la pel·lícula
+            echo "<form method='POST' action='reserves.php'>";
+              echo $dbo->mostrarConsultaDesplegable('peli');
+              echo "<input type ='submit' name='seleccionar' value='Seleccionar'>";
+            echo "</form>";
+      }
+      
+      if (($_POST['user'] == '') && (!$_SESSION ['altraPeli'])){ 
       ?>
      <div id="login">
       <form method="POST">

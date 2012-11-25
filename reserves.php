@@ -2,34 +2,58 @@
    require_once ('../classes/classArxiu.php');
    require_once('../classes/classConnexioPDO.php');
 
+   // Connexió que utilitzem 
+   $dbo = new connexioPDO(); // Connexió a mySQL per defecte
+   $dbo->connectar();
    // Per impedir accessos ‘directes’
    if (!$_SESSION['Validat'])    {
          header("Location: index.php");
    }
-     
+ 
    if (isset($_POST['peli'])) { // Venim de triar peli
+      // 1.- Averiguem la sala on es projecta la peli
       $_SESSION['peli'] = $_POST['peli'];
-      $dbo = new connexioPDO(); // Connexió a mySQL per defecte
-      $dbo->connectar();
       $sql = "SELECT sala FROM `pelicules` WHERE titol='" .$_SESSION['peli'] ."'";
       // echo "sql: " .$sql;
       $dbo->consultar ($sql);
       $sala = $dbo->getCamp('sala');
       $_SESSION['sala'] = $sala;
       $_SESSION['Missatge'] = "Fes clic sobre les butaques que t'interessen.";
+      // 2.- Calculem els punts que té:
+      $sql = "SELECT puntsPelis, puntsRoses FROM `usuaris` WHERE username='" .$_SESSION['Usuari'] ."'";
+      //echo "sql: " .$sql;
+      $dbo->consultar ($sql);
+      $puntsPelis = $dbo->getCamp('puntsPelis');
+      $dbo->consultar ($sql);
+      $puntsRoses = $dbo->getCamp('puntsRoses');
+      // echo "<hr>" .$puntsPelis ." -- "  .$puntsRoses;
+      $_SESSION ['premi'] = "Tens " .$puntsPelis ." punts!!";
+      // 3.- Mirem si passen de 50 i 100 respectivament
+      if ($puntsRoses > 50) {
+         $puntsRoses = $puntsRoses - 50;
+         $_SESSION ['premi'] .= '<br>Et regalem UNA bossa de palometes!';
+      }
+      if ($puntsPelis > 100) {
+         $puntsPelis = $puntsPelis - 100;
+         $_SESSION ['premi'] .= '<br>Et regalem UNA entrada!';
+      }
+      // Actualitzem els punts en la taula
+      $sql = "UPDATE usuaris SET puntsPelis = " .$puntsPelis ." WHERE username = '" .$_SESSION['Usuari'] ."';";
+      $sql .="UPDATE usuaris SET puntsRoses = " .$puntsRoses ." WHERE username = '" .$_SESSION['Usuari'] ."';";
+//      echo "sql: " .$sql;
+      $dbo->consultar ($sql);
    }
-   
+//   echo "<hr>"; 
 //   echo "<pre>"; print_r($_SESSION);
 //   echo "<pre>"; print_r($_GET);
 ?>
 <!DOCTYPE html>
-<html>
+<html> 
   <head>
     <title>Reserves cinema</title>
     <meta charset="utf-8">
     <link href="estils.css" rel="stylesheet">
   </head>
-sala
 
 <?php
    // print_r($_SESSION);
@@ -37,7 +61,9 @@ sala
       $_SESSION['reserves'] = array(); 
    }
    
-   $sala=new salaCine('sala1sessio1.txt');   
+   $nomSala = "sala" .$_SESSION['sala'] .'.txt'; 
+//   echo $nomSala;
+   $sala=new salaCine($nomSala);   
       
    if (isset($_GET['fila'])){ //Reservar una butaca
      $fila =  $_GET['fila'];      $col  =  $_GET['col'];
@@ -59,14 +85,22 @@ sala
        }
        $sala->escriureSala($reserves);
        $entrades = "Entrades comprades: <hr>";
+       $punts = 0; 
        foreach ($_SESSION ['reserves'] as $reserva) {
           $fila =  substr($reserva,0,1);
           $col  =  substr($reserva,1,1);
           $entrades .= "Fila: " .$fila ." -- Columna: " .$col ."<br>";
+          $punts += 10;
        }
        // Esborrar reserves de la sessio
-       // session_unset(); 
        $_SESSION ['reserves'] = null;
+       // Sumem els punts 
+       $sql = "UPDATE usuaris SET puntsPelis = puntsPelis + " .$punts ." WHERE username = '" .$_SESSION['Usuari'] ."';";
+       $sql .="UPDATE usuaris SET puntsRoses = puntsRoses + " .$punts ." WHERE username = '" .$_SESSION['Usuari'] ."';";
+//       echo "sql: " .$sql;
+       $dbo->consultar ($sql);
+       
+       
    }
      
    if (isset($_GET['Anular'])){ //Anul�lar reserves => 0
@@ -82,10 +116,10 @@ sala
          $_SESSION ['reserves'] = null;
    }
    
-   if (isset($_GET['novaSessio'])){ //Totes les butaques a 0
-         $sala->novaSessio(3,4);
-         // Esborrar reserves de la sessio
-         session_unset();       
+   if (isset($_GET['altraPeli'])){ 
+         $_SESSION ['altraPeli'] = true;
+         header('Location: index.php');
+ 
    }
 
       
@@ -95,8 +129,9 @@ sala
    $butaques = "<form name='cine' method='GET' action='reserves.php'>";
    $butaques.= "<table border='1' align='center' >
       <tr><th colspan = '" .$cols ."'> <div class='missatge'> Benvingut:   <div class='text'>" .$_SESSION['Usuari'] ."</th></tr>" 
-    ."<tr><th colspan = '" .$cols ."'> <div class='missatge'> Pel·lícula:  <div class='text'>" .$_SESSION['peli'] ."</th></tr>"
-    ."<tr><th colspan = '" .$cols ."'> <div class='missatge'> Sala:        <div class='text'>" .$_SESSION['sala'] ."</th></tr>";           
+    ."<tr><th colspan = '" .$cols ."'> <div class='missatge'> Pel·lícula:  <div class='text'>" .$_SESSION['peli'] ."</th></tr>"   
+    ."<tr><th colspan = '" .$cols ."'> <div class='missatge'> Sala:        <div class='text'>" .$_SESSION['sala'] ."</th></tr>"           
+    ."<tr><th colspan = '" .$cols ."'> <div class='missatge'> Punts:       <div class='text'>" .$_SESSION['premi'] ."</th></tr>";           
    for ($i= 1; $i<=$files; $i++) {
       $butaques .= "<tr>";      
       for ($j= 1; $j<=$cols; $j++) {
@@ -123,6 +158,7 @@ sala
    // $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='novaSessio' value='Nova sessio de cine' style='width:100%'> </td></tr>";
    $butaques .= "<tr><td colspan = '" .$cols ."'><div class='missatge'>" .$_SESSION['Missatge'] ."</td></tr>";
    $butaques .= "<tr><td colspan = '" .$cols ."' class='entrades'>" .$entrades ."</td></tr>";  
+   $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='altraPeli' value='Seleccionar una altra pel·lícula' style='width:100%'> </td></tr>";
    $butaques .= "</table>";
    $butaques .= "</form>";
    echo $butaques; 

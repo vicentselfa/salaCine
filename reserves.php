@@ -1,3 +1,6 @@
+<?php session_start();
+   require_once ('classArxiu.php');
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -9,9 +12,7 @@
     </style>
   </head>
 
-<?php session_start();
-   require_once ('../classes/classArxiu.php');
-?>
+
 <?php
    if (!isset($_SESSION['reserves'])) { // Primera vegada
       $_SESSION['reserves'] = array(); 
@@ -102,11 +103,11 @@
    echo $butaques; 
 
    /*
-   print_r ($reserves); 
-   echo "Sessio: <hr>";
-   print_r($_SESSION);
-   echo "<hr>GET: <hr>";
-   print_r($_GET);
+      print_r ($reserves); 
+      echo "Sessio: <hr>";
+      print_r($_SESSION);
+      echo "<hr>GET: <hr>";
+      print_r($_GET);
    */ 
    
 ?>

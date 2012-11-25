@@ -1,25 +1,34 @@
 <?php session_start();
    require_once ('../classes/classArxiu.php');
+   require_once('../classes/classConnexioPDO.php');
+
    // Per impedir accessos ‘directes’
    if (!$_SESSION['Validat'])    {
          header("Location: index.php");
    }
-//   
+   $_SESSION['peli'] = $_POST['peli'];
+   // Sala on es projecta
+   $dbo = new connexioPDO(); // Connexió a mySQL per defecte
+   $dbo->connectar();
+   $sql = "SELECT sala FROM `pelicules` WHERE titol='" .$_SESSION['peli'] ."'";
+   // echo "sql: " .$sql;
+   $dbo->consultar ($sql);
+   $sala = $dbo->getCamp('sala');
+   $_SESSION['sala'] = $sala;
+   
+   // echo "<pre>"; print_r($_SESSION);
 ?>
-<!DOCTYPE html>value='vicent'
+<!DOCTYPE html>
 <html>
   <head>
     <title>Reserves cinema</title>
     <meta charset="utf-8">
-    <style TYPE="text/css"> 
-      .sala {font: bold 14pt verdana, sans-serif; color: red; text-align:center} 
-      .entrades {font: bold 10pt verdana, sans-serif; color: navy; text-align:center}
-    </style>
+    <link href="estils.css" rel="stylesheet">
   </head>
-
+sala
 
 <?php
-    print_r($_SESSION);
+   // print_r($_SESSION);
    if (!isset($_SESSION['reserves'])) { // Primera vegada
       $_SESSION['reserves'] = array(); 
    }
@@ -78,7 +87,10 @@
    $reserves = $sala->veureSala();
    $files =$sala->getFiles(); $cols = $sala->getCols();
    $butaques = "<form name='cine' method='GET' action='reserves.php'>";
-   $butaques.= "<table border='1' align='center' ><tr><th colspan = '" .$cols ."' class='sala'>La pantalla</th></tr>";
+   $butaques.= "<table border='1' align='center' >
+      <tr><th colspan = '" .$cols ."'> <div class='missatge'> Benvingut:   <div class='text'>" .$_SESSION['Usuari'] ."</th></tr>" 
+    ."<tr><th colspan = '" .$cols ."'> <div class='missatge'> Pel·lícula:  <div class='text'>" .$_SESSION['peli'] ."</th></tr>"
+    ."<tr><th colspan = '" .$cols ."'> <div class='missatge'> Sala:        <div class='text'>" .$_SESSION['sala'] ."</th></tr>";           
    for ($i= 1; $i<=$files; $i++) {
       $butaques .= "<tr>";      
       for ($j= 1; $j<=$cols; $j++) {

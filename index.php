@@ -9,17 +9,13 @@
 <html>
   <head>
     <title>Reserves cinema</title>   <meta charset="utf-8">
-    <style TYPE="text/css"> 
-       .titol { font: bold 14pt verdana, sans-serif; color: navy; text-align:center;}
-       .text {font: 12pt verdana, sans-serif; color: navy; text-align:center;}
-       .missatge {font: 10pt verdana, sans-serif; color: green; text-align:center;}
-    </style>
+    <link href="estils.css" rel="stylesheet">
   </head>
   <body>
    
      <?php
-     print_r($_SESSION);
-
+     // print_r($_SESSION);
+     
      if (isset($_POST['Validar'])) {
            // echo "Validar";
            $dbo = new connexioPDO(); // Connexió a mySQL per defecte
@@ -29,7 +25,13 @@
                    $_SESSION['Usuari'] = $_POST['user'];
                    $_SESSION['Validat'] = true;
                    $_SESSION['Missatge'] = "Usuari validat";
-                   header('Location: reserves.php');
+                   echo "Tria una  pel·lícula: <hr>";
+                   $dbo->consultar ("select titol from pelicules;")  ;
+                   // El formulari per triar la pel·lícula
+                   echo "<form method='POST' action='reserves.php'>";
+                     echo $dbo->mostrarConsultaDesplegable('peli');
+                     echo "<input type ='submit' name='seleccionar' value='Seleccionar'>";
+                   echo "</form>";
                }
                else {
                   echo "NO validat!";
@@ -44,7 +46,7 @@
                $dbo = new connexioPDO(); // Connexió a mySQL per defecte
                $dbo->connectar();
                if ($dbo->registrar($_POST['user'], $_POST['password']) ) {
-                  $_SESSION['Usuari'] = $Usuari;
+                  $_SESSION['Usuari'] = $_POST['user'];
                   $_SESSION['Validat'] = true;
                   $_SESSION['Missatge'] = "";
                   header('Location: reserves.php');
@@ -56,13 +58,15 @@
            }
          }
       } 
+      if ($_POST['user'] =='') { 
       ?>
+     <div id="login">
       <form method="POST">
          <table align="center" width="225" cellspacing="2" cellpadding="2" border="1">
             <tr>
                <td colspan="2" align="center"> <div class='titol'> Sala de cine </div></td>
             </tr>
-            <tr>
+            <tr>//
                <td ><div class='text'>Usuari:</div></td>
                <td><input type="Text" name="user" size="8" maxlength="50" value='vicent'></td>
             </tr>
@@ -79,5 +83,6 @@
             </tr>
          </table> 
       </form>
+      </div>
    </body> 
-    
+   <?php }     ?>

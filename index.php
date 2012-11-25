@@ -1,9 +1,9 @@
 <?php 
    session_start(); 
-   if ($_SESSION['Missatge']) {
+   if ($_SESSION['Missatge'] == '') {
       $_SESSION['Missatge'] ="Escriu usuari i contrasenya o registra't";
    }
-   require_once('classConnexioPDO.php');
+   require_once('../classes/classConnexioPDO.php');
 ?>
 <!DOCTYPE html>
 <html>
@@ -18,7 +18,7 @@
   <body>
    
      <?php
-     // print_r($_SESSION);
+     print_r($_SESSION);
 
      if (isset($_POST['Validar'])) {
            // echo "Validar";
@@ -26,9 +26,9 @@
            $dbo->connectar();
            if ($_POST['user'] !='') {
                if ($dbo->login($_POST['user'], $_POST['password'])) {
-                   $_SESSION['Usuari'] = $Usuari;
+                   $_SESSION['Usuari'] = $_POST['user'];
                    $_SESSION['Validat'] = true;
-                   $_SESSION['Missatge'] = "";
+                   $_SESSION['Missatge'] = "Usuari validat";
                    header('Location: reserves.php');
                }
                else {
@@ -64,11 +64,11 @@
             </tr>
             <tr>
                <td ><div class='text'>Usuari:</div></td>
-               <td><input type="Text" name="user" size="8" maxlength="50"></td>
+               <td><input type="Text" name="user" size="8" maxlength="50" value='vicent'></td>
             </tr>
             <tr>
                <td ><div class='text'>Contrasenya:</div></td>
-               <td><input type="password" name="password" size="8" maxlength="50"></td>
+               <td><input type="password" name="password" size="8" maxlength="50" value='vicent'></td>
             </tr>
             <tr>
                <td align="center"><input type="Submit" name = "Validar" value="Validar"></td>

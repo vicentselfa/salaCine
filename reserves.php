@@ -1,7 +1,12 @@
 <?php session_start();
-   require_once ('classArxiu.php');
+   require_once ('../classes/classArxiu.php');
+   // Per impedir accessos ‘directes’
+   if (!$_SESSION['Validat'])    {
+         header("Location: index.php");
+   }
+//   
 ?>
-<!DOCTYPE html>
+<!DOCTYPE html>value='vicent'
 <html>
   <head>
     <title>Reserves cinema</title>
@@ -14,6 +19,7 @@
 
 
 <?php
+    print_r($_SESSION);
    if (!isset($_SESSION['reserves'])) { // Primera vegada
       $_SESSION['reserves'] = array(); 
    }

@@ -6,17 +6,21 @@
    if (!$_SESSION['Validat'])    {
          header("Location: index.php");
    }
-   $_SESSION['peli'] = $_POST['peli'];
-   // Sala on es projecta
-   $dbo = new connexioPDO(); // Connexió a mySQL per defecte
-   $dbo->connectar();
-   $sql = "SELECT sala FROM `pelicules` WHERE titol='" .$_SESSION['peli'] ."'";
-   // echo "sql: " .$sql;
-   $dbo->consultar ($sql);
-   $sala = $dbo->getCamp('sala');
-   $_SESSION['sala'] = $sala;
+     
+   if (isset($_POST['peli'])) { // Venim de triar peli
+      $_SESSION['peli'] = $_POST['peli'];
+      $dbo = new connexioPDO(); // Connexió a mySQL per defecte
+      $dbo->connectar();
+      $sql = "SELECT sala FROM `pelicules` WHERE titol='" .$_SESSION['peli'] ."'";
+      // echo "sql: " .$sql;
+      $dbo->consultar ($sql);
+      $sala = $dbo->getCamp('sala');
+      $_SESSION['sala'] = $sala;
+      $_SESSION['Missatge'] = "Fes clic sobre les butaques que t'interessen.";
+   }
    
-   // echo "<pre>"; print_r($_SESSION);
+//   echo "<pre>"; print_r($_SESSION);
+//   echo "<pre>"; print_r($_GET);
 ?>
 <!DOCTYPE html>
 <html>
@@ -61,7 +65,8 @@ sala
           $entrades .= "Fila: " .$fila ." -- Columna: " .$col ."<br>";
        }
        // Esborrar reserves de la sessio
-       session_unset();       
+       // session_unset(); 
+       $_SESSION ['reserves'] = null;
    }
      
    if (isset($_GET['Anular'])){ //Anul�lar reserves => 0
@@ -73,7 +78,8 @@ sala
          }
          $sala->escriureSala($reserves);
          // Esborrar reserves de la sessio
-         session_unset();       
+         // session_unset();   
+         $_SESSION ['reserves'] = null;
    }
    
    if (isset($_GET['novaSessio'])){ //Totes les butaques a 0
@@ -112,10 +118,11 @@ sala
       }
       $butaques .= "/<tr>";
    }
-   $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='Confirmar' value='Confirmar reserves ' style='width:100%'> </th></tr>";
-   $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='Anular' value='Anul·lar reserves sense confirmar' style='width:100%'> </th></tr>";
-   $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='novaSessio' value='Nova sessio de cine' style='width:100%'> </th></tr>";
-   $butaques .= "<tr><td colspan = '" .$cols ."' class='entrades'>" .$entrades ."</th></tr>";   
+   $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='Confirmar' value='Pagar i confirmar reserves ' style='width:100%'> </td></tr>";
+   $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='Anular' value='Anul·lar reserves sense confirmar' style='width:100%'> </td></tr>";
+   // $butaques .= "<tr><td colspan = '" .$cols ."'><input type = 'submit' name='novaSessio' value='Nova sessio de cine' style='width:100%'> </td></tr>";
+   $butaques .= "<tr><td colspan = '" .$cols ."'><div class='missatge'>" .$_SESSION['Missatge'] ."</td></tr>";
+   $butaques .= "<tr><td colspan = '" .$cols ."' class='entrades'>" .$entrades ."</td></tr>";  
    $butaques .= "</table>";
    $butaques .= "</form>";
    echo $butaques; 

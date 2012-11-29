@@ -9,7 +9,7 @@
    if (!$_SESSION['Validat'])    {
          header("Location: index.php");
    }
- 
+   
    if (isset($_POST['peli'])) { // Venim de triar peli
       // 1.- Averiguem la sala on es projecta la peli
       $_SESSION['peli'] = $_POST['peli'];
@@ -43,10 +43,8 @@
 //      echo "sql: " .$sql;
       $dbo->consultar ($sql);
    }
-//   echo "<hr>"; 
-//   echo "<pre>"; print_r($_SESSION);
-//   echo "<pre>"; print_r($_GET);
-?>
+   
+?>   
 <!DOCTYPE html>
 <html> 
   <head>
@@ -54,8 +52,11 @@
     <meta charset="utf-8">
     <link href="estils.css" rel="stylesheet">
   </head>
-
 <?php
+//   echo "<hr>"; 
+//   echo "<pre>"; print_r($_SESSION);
+//   echo "<pre>"; print_r($_GET);
+
    // print_r($_SESSION);
    if (!isset($_SESSION['reserves'])) { // Primera vegada
       $_SESSION['reserves'] = array(); 
@@ -67,8 +68,8 @@
       
    if (isset($_GET['fila'])){ //Reservar una butaca
      $fila =  $_GET['fila'];      $col  =  $_GET['col'];
-     // Creem acc�s exclusiu a l'arxiu mentres reservem!!!
-     $reserves = $sala->veureSala();  // Ac� obrim l'arxiu !!!
+     // Creem accés exclusiu a l'arxiu mentres reservem!!!
+     $reserves = $sala->veureSala();  // Ací obrim l'arxiu !!!
      $reserves [$fila] = substr_replace ( $reserves [$fila] , '1' , $col-1 ,1 );
      $sala->escriureSala($reserves);  // Ac� tanquem l'arxiu !!!
      // Guardar les reserves d'esta sessi�
@@ -103,7 +104,7 @@
        
    }
      
-   if (isset($_GET['Anular'])){ //Anul�lar reserves => 0
+   if (isset($_GET['Anular'])){ //Anul.lar reserves => 0
          $reserves = $sala->veureSala();
          foreach ($_SESSION ['reserves'] as $reserva) {
             $fila =  substr($reserva,0,1);

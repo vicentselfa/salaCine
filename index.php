@@ -3,7 +3,7 @@
    if ($_SESSION['Missatge'] == '') {
       $_SESSION['Missatge'] ="Escriu usuari i contrasenya o registra't";
    }
-   require_once('../classes/classConnexioPDO.php');
+   
 ?>
 <!DOCTYPE html>
 <html>
@@ -15,6 +15,7 @@
    
      <?php
      // print_r($_SESSION);
+     y
      
      if (isset($_POST['Validar'])) {
            // echo "Validar";

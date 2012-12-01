@@ -1,0 +1,36 @@
+root { 
+   display: block;
+}
+body { 
+   font: bold 10pt verdana, sans-serif; color: navy; text-align:center;
+}
+.titol { 
+   font: bold 14pt verdana, sans-serif; color: navy; text-align:center;
+}
+.text {
+   display: inline-block; font: 12pt verdana, sans-serif; color: navy; text-align:center;
+}
+.missatge {
+   float: left; font: 10pt verdana, sans-serif; color: green; text-align:center; clear:left;
+}
+.sala {
+   display: inline-block; float: left; font: bold 10pt verdana, sans-serif; color: navy; text-align:center;
+} 
+.usuari {
+   display: inline-block; font: bold 12pt verdana, sans-serif; color: navy; text-align:center;
+} 
+.peli {
+   display: inline-block; font: bold 12pt verdana, sans-serif; color: navy; text-align:center;
+} 
+.entrades {
+   font: bold 10pt verdana, sans-serif; color: navy; text-align:center;
+}
+#login {  
+   margin-top: 20px; padding: 0; width:100%; height: 100%;
+}
+#salaCine {  
+   margin-top: 100px; padding: 0; width:100%; height: 100%;
+}
+#pelis{  
+  padding: 0; width:100%; height: 100%;
+}

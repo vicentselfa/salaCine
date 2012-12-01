@@ -3,7 +3,8 @@
    if ($_SESSION['Missatge'] == '') {
       $_SESSION['Missatge'] ="Escriu usuari i contrasenya o registra't";
    }
-   
+   require_once('../classes/classConnexioPDO.php');
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -15,7 +16,6 @@
    
      <?php
      // print_r($_SESSION);
-     y
      
      if (isset($_POST['Validar'])) {
            // echo "Validar";
@@ -26,6 +26,7 @@
                    $_SESSION['Usuari'] = $_POST['user'];
                    $_SESSION['Validat'] = true;
                    $_SESSION['Missatge'] = "Usuari validat";
+                   $_SESSION ['reserves'] = null;
                    echo "Tria una  pel·lícula: <hr>";
                    $dbo->consultar ("select titol from pelicules;")  ;
                    // El formulari per triar la pel·lícula
@@ -49,6 +50,7 @@
                $_SESSION['Usuari'] = $_POST['user'];
                $_SESSION['Validat'] = true;
                $_SESSION['Missatge'] = "";
+               $_SESSION ['reserves'] = null;
                header('Location: reserves.php');
             }
             else {
@@ -77,7 +79,7 @@
             <tr>
                <td colspan="2" align="center"> <div class='titol'> Sala de cine </div></td>
             </tr>
-            <tr>//
+            <tr>
                <td ><div class='text'>Usuari:</div></td>
                <td><input type="Text" name="user" size="8" maxlength="50" value='vicent'></td>
             </tr>

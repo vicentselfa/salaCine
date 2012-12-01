@@ -1,16 +1,52 @@
 <?php session_start();
-   require_once ('../classes/classArxiu.php');
-   require_once('../classes/classConnexioPDO.php');
-
-   // Connexió que utilitzem 
-   $dbo = new connexioPDO(); // Connexió a mySQL per defecte
-   $dbo->connectar();
    // Per impedir accessos ‘directes’
    if (!$_SESSION['Validat'])    {
          header("Location: index.php");
    }
+   require_once ('../classes/classArxiu.php');
+   require_once('../classes/classConnexioPDO.php');
+?>
+<!DOCTYPE html>
+<html> 
+  <head>
+    <title>Reserves cinema</title>
+    <meta charset="utf-8">
+    <link href="estils.css" rel="stylesheet">
+  </head>
+  
+<?php
+   if (!isset($_SESSION['reserves'])) { // Primera vegada
+      $_SESSION['reserves'] = array(); 
+   }
    
-   if (isset($_POST['peli'])) { // Venim de triar peli
+  $tMaxSessio = 30; // Nombre de segons per sessió
+  if (!isset($_SESSION['ultimaActivitat'])) {
+      // Comencem a contar el temps de la sessió
+      $_SESSION['ultimaActivitat'] = time();
+  }   
+
+   // Connexió que utilitzem 
+   $dbo = new connexioPDO(); // Connexió a mySQL per defecte
+   $dbo->connectar();
+
+   if (isset($_POST['peli'])) { // echo "Venim de triar peli.";
+      
+      if (isset($_SESSION['sala'])) {
+         // echo "Anul·lem les reserves no confirmades";
+         $nomSala = "sala" .$_SESSION['sala'] .'.txt'; 
+         $sala=new salaCine($nomSala);  
+         $reserves = $sala->veureSala();
+         foreach ($_SESSION ['reserves'] as $reserva) {
+           $fila =  substr($reserva,0,1);
+           $col  =  substr($reserva,1,1);
+           $reserves [$fila] = substr_replace ( $reserves [$fila] , '0' , $col-1 ,1 );
+         }
+
+         $sala->escriureSala($reserves);
+         // Esborrar reserves de la sessio
+          $_SESSION ['reserves'] = null;
+      }
+      
       // 1.- Averiguem la sala on es projecta la peli
       $_SESSION['peli'] = $_POST['peli'];
       $sql = "SELECT sala FROM `pelicules` WHERE titol='" .$_SESSION['peli'] ."'";
@@ -44,32 +80,51 @@
       $dbo->consultar ($sql);
    }
    
-?>   
-<!DOCTYPE html>
-<html> 
-  <head>
-    <title>Reserves cinema</title>
-    <meta charset="utf-8">
-    <link href="estils.css" rel="stylesheet">
-  </head>
-<?php
+   // echo "<pre>Get: "; print_r($_GET) ."</pre>";
+   $nomSala = "sala" .$_SESSION['sala'] .'.txt'; 
+   $sala=new salaCine($nomSala);  
+
+  // echo "Temps remanent: " .(time() - $_SESSION['ultimaActivitat']);
+  // Controlem el temps que dura la sessio
+  // echo "Temps màxim: " .(time() - $_SESSION['ultimaActivitat']);
+  if ( (isset($_SESSION['ultimaActivitat'])) && ((time() - $_SESSION['ultimaActivitat'])  > $tMaxSessio ) ) {
+
+     // Anul·lem les reserves no confirmades
+     $reserves = $sala->veureSala();
+     foreach ($_SESSION ['reserves'] as $reserva) {
+        $fila =  substr($reserva,0,1);
+        $col  =  substr($reserva,1,1);
+        $reserves [$fila] = substr_replace ( $reserves [$fila] , '0' , $col-1 ,1 );
+     }
+     $sala->escriureSala($reserves);
+     
+     // echo " Anul·lem les variables de sessió";
+     session_unset();
+     // Recuperem les variables de sessió que necessitem
+     $_SESSION['Missatge'] = "La sessió ha caducat!";
+     $_SESSION['Validat'] = false;
+     $_POST['Validar'] = true;
+     
+     unset ($_GET['fila']); // Per anul·lar la última selecció feta fora de temps
+     unset ($_GET['col']); // Per anul·lar la última selecció feta fora de temps
+     // Enviem a la pàgina de login
+     header("Location: index.php");
+  }
+   
+   
 //   echo "<hr>"; 
 //   echo "<pre>"; print_r($_SESSION);
 //   echo "<pre>"; print_r($_GET);
 
    // print_r($_SESSION);
-   if (!isset($_SESSION['reserves'])) { // Primera vegada
-      $_SESSION['reserves'] = array(); 
-   }
+
    
-   $nomSala = "sala" .$_SESSION['sala'] .'.txt'; 
-//   echo $nomSala;
-   $sala=new salaCine($nomSala);   
+
       
    if (isset($_GET['fila'])){ //Reservar una butaca
      $fila =  $_GET['fila'];      $col  =  $_GET['col'];
-     // Creem accés exclusiu a l'arxiu mentres reservem!!!
-     $reserves = $sala->veureSala();  // Ací obrim l'arxiu !!!
+     // Creem acc�s exclusiu a l'arxiu mentres reservem!!!
+     $reserves = $sala->veureSala();  // Ac� obrim l'arxiu !!!
      $reserves [$fila] = substr_replace ( $reserves [$fila] , '1' , $col-1 ,1 );
      $sala->escriureSala($reserves);  // Ac� tanquem l'arxiu !!!
      // Guardar les reserves d'esta sessi�
@@ -104,7 +159,7 @@
        
    }
      
-   if (isset($_GET['Anular'])){ //Anul.lar reserves => 0
+   if (isset($_GET['Anular'])){ //Anul�lar reserves => 0
          $reserves = $sala->veureSala();
          foreach ($_SESSION ['reserves'] as $reserva) {
             $fila =  substr($reserva,0,1);
@@ -123,7 +178,7 @@
  
    }
 
-      
+     
    // Creem el formulari amb les dades de l'arxiu
    $reserves = $sala->veureSala();
    $files =$sala->getFiles(); $cols = $sala->getCols();
